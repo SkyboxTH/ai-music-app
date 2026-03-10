@@ -1,6 +1,6 @@
 FROM python:3.9-slim
 
-# 1. ติดตั้ง System Dependencies ทั้งหมด
+# 1. ติดตั้ง System Dependencies ที่จำเป็น
 RUN apt-get update && apt-get install -y \
     git \
     ffmpeg \
@@ -13,18 +13,19 @@ RUN apt-get update && apt-get install -y \
     libswresample-dev \
     libavfilter-dev \
     build-essential \
-    python3-dev \
     && apt-get clean
 
 WORKDIR /app
 
-# 2. อัปเกรด pip และลง Cython ก่อนเป็นอันดับแรก (สำคัญมากสำหรับ av)
+# 2. อัปเกรดเครื่องมือพื้นฐาน
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir Cython==0.29.36 
+
+# 3. ติดตั้ง av แบบ Binary (ท่าไม้ตาย: ข้ามขั้นตอน Build ที่มีปัญหา)
+RUN pip install --no-cache-dir av --only-binary=:all:
 
 COPY . .
 
-# 3. ติดตั้ง requirements
+# 4. ติดตั้งตัวอื่นๆ ที่เหลือ
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8501
