@@ -1,0 +1,7 @@
+services:
+  music-app:
+    build: .
+    container_name: ai-music-container
+    ports:
+      - "8501:8501"
+    restart: always
