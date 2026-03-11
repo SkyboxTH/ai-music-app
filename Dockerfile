@@ -1,30 +1,25 @@
-FROM python:3.9-slim
+# 1. ใช้ Image ที่มีปูพื้นฐานเรื่อง AI และ Library เสียงมาให้ครบแล้ว
+FROM python:3.9-buster
 
-# 1. ติดตั้งทุกอย่างที่ต้องใช้ Compile ในคำสั่งเดียว (รวม pkg-config และพวก libav ทั้งหมด)
+# 2. ติดตั้งเครื่องมือจัดการไฟล์เสียงให้ครบในระบบ
 RUN apt-get update && apt-get install -y \
-    git \
     ffmpeg \
-    pkg-config \
-    build-essential \
-    libavformat-dev \
     libavcodec-dev \
-    libavdevice-dev \
+    libavformat-dev \
     libavutil-dev \
-    libswscale-dev \
     libswresample-dev \
-    libavfilter-dev \
-    python3-dev \
+    pkg-config \
+    git \
     && apt-get clean
 
 WORKDIR /app
 
-# 2. บังคับลง av และ scipy แบบสำเร็จรูป (Binary) เพื่อข้ามปัญหาเดิมที่คุณเจอในรูป
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir av scipy --only-binary=:all:
+# 3. ติดตั้ง av เวอร์ชันที่เสถียร "ก่อน" ตัวอื่น เพื่อไม่ให้ audiocraft ไปสั่ง build เอง
+RUN pip install --no-cache-dir av==10.0.0
 
 COPY . .
 
-# 3. ติดตั้งตัวที่เหลือ
+# 4. ติดตั้งตัวที่เหลือ (torch, audiocraft, streamlit)
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8501
