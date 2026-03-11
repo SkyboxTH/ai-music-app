@@ -1,25 +1,30 @@
 FROM python:3.9-slim
 
-# 1. ลงเครื่องมือพื้นฐาน
+# 1. ติดตั้งทุกอย่างที่ต้องใช้ Compile ในคำสั่งเดียว (รวม pkg-config และพวก libav ทั้งหมด)
 RUN apt-get update && apt-get install -y \
     git \
     ffmpeg \
     pkg-config \
     build-essential \
+    libavformat-dev \
+    libavcodec-dev \
+    libavdevice-dev \
+    libavutil-dev \
+    libswscale-dev \
+    libswresample-dev \
+    libavfilter-dev \
+    python3-dev \
     && apt-get clean
 
 WORKDIR /app
 
-# 2. อัปเกรดเครื่องมือติดตั้ง
+# 2. บังคับลง av และ scipy แบบสำเร็จรูป (Binary) เพื่อข้ามปัญหาเดิมที่คุณเจอในรูป
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-
-# 3. ติดตั้ง av และ scipy แบบสำเร็จรูป (Binary) ตัดหน้าไว้ก่อนเลย!
-# สองตัวนี้คือตัวปัญหา ถ้าลงแบบนี้จะเร็วและไม่ Error ครับ
 RUN pip install --no-cache-dir av scipy --only-binary=:all:
 
 COPY . .
 
-# 4. ติดตั้งตัวที่เหลือ (streamlit, audiocraft, torch, torchaudio)
+# 3. ติดตั้งตัวที่เหลือ
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8501
