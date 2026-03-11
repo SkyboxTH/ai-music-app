@@ -1,7 +1,7 @@
-# 1. ใช้ Image ที่มีปูพื้นฐานเรื่อง AI และ Library เสียงมาให้ครบแล้ว
-FROM python:3.9-buster
+# 1. ใช้เวอร์ชันใหม่ล่าสุดที่เสถียร (Bookworm)
+FROM python:3.9-bookworm
 
-# 2. ติดตั้งเครื่องมือจัดการไฟล์เสียงให้ครบในระบบ
+# 2. ติดตั้งเครื่องมือจัดการไฟล์เสียง (คลังของ bookworm จะไม่มีปัญหา 404)
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     libavcodec-dev \
@@ -14,12 +14,15 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# 3. ติดตั้ง av เวอร์ชันที่เสถียร "ก่อน" ตัวอื่น เพื่อไม่ให้ audiocraft ไปสั่ง build เอง
+# 3. อัปเกรดเครื่องมือ
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# 4. ติดตั้ง av เวอร์ชันที่เสถียร
 RUN pip install --no-cache-dir av==10.0.0
 
 COPY . .
 
-# 4. ติดตั้งตัวที่เหลือ (torch, audiocraft, streamlit)
+# 5. ติดตั้งตัวที่เหลือจาก requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8501
