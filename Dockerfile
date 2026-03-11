@@ -1,7 +1,7 @@
-# 1. ใช้ Python 3.9 แบบตัวเต็ม (ไม่ใช่ slim) เพื่อให้มีเครื่องมือครบ
+# 1. ใช้ Python 3.9 Bookworm เหมือนเดิม
 FROM python:3.9-bookworm
 
-# 2. ติดตั้ง Library พื้นฐาน (ผมแยกบรรทัดให้มันอ่านง่ายและชัวร์ที่สุด)
+# 2. ลง Library พื้นฐาน (ผมเน้นตัวที่ av ต้องใช้)
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     pkg-config \
@@ -13,13 +13,15 @@ RUN apt-get update && apt-get install -y \
     libavutil-dev \
     libswscale-dev \
     libswresample-dev \
-    libavfilter-dev
+    libavfilter-dev \
+    && apt-get clean
 
 WORKDIR /app
 
-# 3. สั่งติดตั้ง av และ scipy แบบ Binary เท่านั้น (ห้ามให้มัน Build เองเด็ดขาด)
+# 3. ติดตั้ง av และ scipy แบบ Binary โดยไม่ต้องระบุเลขเวอร์ชัน
+# ระบบจะเลือกเวอร์ชันที่ "ลงได้เลย" มาให้เราเอง
 RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir --only-binary=:all: av==10.0.0 scipy
+RUN pip install --no-cache-dir --only-binary=:all: av scipy
 
 COPY . .
 
